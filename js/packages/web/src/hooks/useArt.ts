@@ -185,7 +185,7 @@ export const useExtendedArt = (id?: StringPublicKey) => {
   );
 
   useEffect(() => {
-    if ((inView || width < 768) && id && !data) {
+    if (id && data === undefined) {
       const USE_CDN = false;
       const routeCDN = (uri: string) => {
         let result = uri;

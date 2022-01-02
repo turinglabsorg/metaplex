@@ -3,7 +3,7 @@ import { Image } from 'antd';
 import { MetadataCategory, MetadataFile, pubkeyToString } from '@oyster/common';
 import { MeshViewer } from '../MeshViewer';
 import { ThreeDots } from '../MyLoader';
-import { useCachedImage, useExtendedArt } from '../../hooks';
+import { useArt, useCachedImage, useExtendedArt } from '../../hooks';
 import { Stream, StreamPlayerApi } from '@cloudflare/stream-react';
 import { PublicKey } from '@solana/web3.js';
 import { getLast } from '../../utils/utils';
@@ -242,6 +242,7 @@ export const ArtContent = ({
   animationURL,
   files,
   artView,
+  autoplay,
 }: {
   category?: MetadataCategory;
   className?: string;
@@ -257,6 +258,7 @@ export const ArtContent = ({
   animationURL?: string;
   files?: (MetadataFile | string)[];
   artView?: boolean;
+  autoplay?: boolean;
 }) => {
   const [uriState, setUriState] = useState<string | undefined>();
   const [animationURLState, setAnimationURLState] = useState<string | undefined>();
@@ -264,9 +266,9 @@ export const ArtContent = ({
   const [categoryState, setCategoryState] = useState<MetadataCategory | undefined>();
 
   const id = pubkeyToString(pubkey);
-
+  const art = useArt(id);
+  console.log('Fetching data from ' + id)
   const { ref, data } = useExtendedArt(id);
-
   useEffect(() => {
     setUriState(uri);
   }, [uri]);
@@ -284,21 +286,26 @@ export const ArtContent = ({
   }, [category]);
 
   useEffect(() => {
-    if (pubkey && data) {
+    console.log('Setting up data to content')
+    console.log(data)
+    if (pubkey && data !== undefined) {
+      console.log('Setting up image: ' + data.image)
       setUriState(data.image);
       setAnimationURLState(data.animation_url);
     }
 
     if (pubkey && data?.properties) {
+      console.log('Setting up files:', data.properties.files)
       setFilesState(data.properties.files);
+      console.log('Setting up category:', data.properties.category)
       setCategoryState(data.properties.category);
+      console.log('Category state is now', categoryState)
     }
   }, [pubkey, data])
 
   const animationUrlExt = new URLSearchParams(
     getLast((animationURLState || '').split('?')),
   ).get('ext');
-
   if (
     allowMeshRender &&
     (categoryState === 'vr' ||
@@ -329,7 +336,6 @@ export const ArtContent = ({
       />
     );
   }
-
   const content =
     categoryState === 'video' ? (
       <VideoArtContent
@@ -340,6 +346,20 @@ export const ArtContent = ({
         animationURL={animationURLState}
         active={active}
       />
+    ) : categoryState === 'audio' ? (
+      <div style={{width: "100%"}}>
+        <CachedImageContent
+          uri={uriState}
+          className={className}
+          preview={preview}
+          style={style}
+        />
+        {filesState !== undefined && filesState[1] !== undefined && filesState[1]['uri'] !== undefined &&
+          <audio style={{ width: "100%" }} autoPlay={autoplay} loop controls>
+            <source src={filesState[1]['uri']} type="audio/mpeg" />
+          </audio>
+        }
+      </div>
     ) : (
       <CachedImageContent
         uri={uriState}

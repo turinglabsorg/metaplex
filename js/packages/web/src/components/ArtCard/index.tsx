@@ -96,6 +96,7 @@ export const ArtCard = (props: ArtCardProps) => {
           height={height}
           width={width}
           artView={artView}
+          autoplay={false}
         />
       </div>
       <Meta

@@ -46,14 +46,14 @@ export const ArtView = () => {
     badge = `${art.edition} of ${art.supply}`;
   }
   const { ref, data } = useExtendedArt(id);
-
+ 
   // const { userAccounts } = useUserAccounts();
 
   // const accountByMint = userAccounts.reduce((prev, acc) => {
   //   prev.set(acc.info.mint.toBase58(), acc);
   //   return prev;
   // }, new Map<string, TokenAccount>());
-
+  
   const description = data?.description;
   const attributes = data?.attributes;
 
@@ -97,6 +97,7 @@ export const ArtView = () => {
               active={true}
               allowMeshRender={true}
               artView={true}
+              autoplay={true}
             />
           </Col>
           {/* <Divider /> */}
